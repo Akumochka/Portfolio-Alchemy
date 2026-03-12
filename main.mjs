@@ -37,7 +37,7 @@ response = await (await fetch(statusURL,{
 
 console.log(response);
 
-//Answer
+//Answer 1
 const answerResponse = await (await fetch(submitURL, {
     method: "POST",
     headers: {
@@ -48,4 +48,18 @@ const answerResponse = await (await fetch(submitURL, {
     body: JSON.stringify({ answer: "4" }) 
 })).json();
 
-console.log(answerResponse);
+// console.log(answerResponse);
+
+//Answer 2
+
+const secondAnswerResponse = await (await fetch(submitURL, {
+    method: "POST",
+    headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": token
+    },
+    body: JSON.stringify({ answer: "PI" }) 
+})).json();
+
+console.log(secondAnswerResponse);
