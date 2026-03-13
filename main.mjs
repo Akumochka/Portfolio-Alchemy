@@ -14,7 +14,8 @@ const userConfig = {
 const answers = {
     1: "4",
     2: "PI",
-    3: "Gold,Quicksilver,Silver,Iron,Gold"
+    3: "Gold,Quicksilver,Silver,Iron,Gold",
+    4: "Silver"
 };
 
 const solvedChallenges = {};
