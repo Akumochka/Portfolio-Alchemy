@@ -11,55 +11,100 @@ const userConfig = {
     "pin": "8811"
 };
 
-let response = await (await fetch(startURL, {
-    body: JSON.stringify(userConfig), 
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json"
+const answers = {
+    1: "4",
+    2: "PI",
+    3: "Gold,Quicksilver,Silver,Iron,Gold"
+};
+
+const solvedChallenges = {};
+
+async function startSession() {
+
+    const response = await fetch(startURL, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        },
+        body: JSON.stringify(userConfig)
+    });
+
+    const data = await response.json();
+    return data.token;
+}
+
+async function getStatus(token) {
+
+    const response = await fetch(statusURL, {
+        method: "GET",
+        headers: {
+            "Authorization": token,
+            "Accept": "application/json"
+        }
+    });
+
+    return response.json();
+}
+
+async function submitAnswer(token, answer) {
+
+    const response = await fetch(submitURL, {
+        method: "POST",
+        headers: {
+            "Authorization": token,
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        },
+        body: JSON.stringify({ answer: answer })
+    });
+
+    return response.json();
+}
+
+async function solveChallenge(token) {
+
+    const status = await getStatus(token);
+
+    console.log("Challenge:", status.challengeId);
+    console.log("Prompt:", status.prompt);
+    console.log("Score:", status.currentScore);
+
+    const id = status.challengeId;
+
+    if (solvedChallenges[id]) {
+        console.log("Already solved");
+        return;
     }
-})).json();
 
-console.log(response);
+    const answer = answers[id];
 
-//Token 
-let token = response.token;
-
-console.log(token);
-
-response = await (await fetch(statusURL,{
-    method: "GET",
-    headers: {
-        "Accept": "application/json",
-        "Authorization": token,
-        "Content-Type": "application/json"
+    if (!answer) {
+        console.log("Answer not known yet.");
+        return;
     }
-})).json();
 
-console.log(response);
+    const result = await submitAnswer(token, answer);
 
-//Answer 1
-const answerResponse = await (await fetch(submitURL, {
-    method: "POST",
-    headers: {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-        "Authorization": token
-    },
-    body: JSON.stringify({ answer: "4" }) 
-})).json();
+    console.log("Result:", result);
 
-// console.log(answerResponse);
+    if (result.correct) {
 
-//Answer 2
+        solvedChallenges[id] = true;
 
-const secondAnswerResponse = await (await fetch(submitURL, {
-    method: "POST",
-    headers: {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-        "Authorization": token
-    },
-    body: JSON.stringify({ answer: "PI" }) 
-})).json();
+        await solveChallenge(token);
+    } else {
+        console.log("Wrong answer");
+    }
+}
 
-console.log(secondAnswerResponse);
+async function main() {
+
+    const token = await startSession();
+
+    console.log("Session started");
+
+    await solveChallenge(token);
+}
+
+main();
