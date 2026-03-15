@@ -15,7 +15,8 @@ const answers = {
     1: "4",
     2: "PI",
     3: "Gold,Quicksilver,Silver,Iron,Gold",
-    4: "Silver"
+    4: "Silver",
+    // 5: "Silver"
 };
 
 const solvedChallenges = {};
@@ -63,6 +64,19 @@ async function submitAnswer(token, answer) {
     return response.json();
 }
 
+async function getClue(token) {
+
+    const response = await fetch(clueURL, {
+        method: "GET",
+        headers: {
+            "Authorization": token,
+            "Accept": "application/json"
+        }
+    });
+
+    return response.json();
+}
+
 async function solveChallenge(token) {
 
     const status = await getStatus(token);
@@ -81,7 +95,11 @@ async function solveChallenge(token) {
     const answer = answers[id];
 
     if (!answer) {
-        console.log("Answer not known yet.");
+        console.log("Answer not known yet. Getting clue");
+        
+        const clue = await getClue(token);
+        console.log("Clue:", clue.clue);
+
         return;
     }
 
@@ -95,7 +113,10 @@ async function solveChallenge(token) {
 
         await solveChallenge(token);
     } else {
-        console.log("Wrong answer");
+        console.log("Wrong answer. Getting clue");
+        
+        const clue = await getClue(token);
+        console.log("Clue:", clue.clue);
     }
 }
 
